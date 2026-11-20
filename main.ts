@@ -19,6 +19,11 @@ if (!existsSync(poster)) {
 }
 mkdirSync(targetDir, { recursive: true });
 const bytes = readFileSync(poster);
+// Fail fast when the poster breaks the gate (at most 1 MiB): a too-big
+// file is refused outright, so catching it here beats a rejected entry.
+if (bytes.length > 1048576) {
+  throw new Error(`entry.png is ${bytes.length} bytes, over the 1 MiB gate`);
+}
 writeFileSync(target, bytes);
 const written = readFileSync(target);
 if (!written.equals(bytes)) {
